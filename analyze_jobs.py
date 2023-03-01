@@ -62,9 +62,11 @@ def main():
    parser = argparse.ArgumentParser(description='')
    parser.add_argument('-j','--jobid',help='name of jobid to process.',required=True,action='append')
    # parser.add_argument('-o','--output',help='output filename',required=True)
-   parser.add_argument('-i','--input-base',help='input base path where to find job folders',default='/eagle/atlas_aesp/madgraph/jobs')
-   parser.add_argument('-n','--gpus-per-node',help='number of gpus (or ranks) per node',default=4,type=int)
-   parser.add_argument('-r','--ranks-per-gpu',help='number of ranks per gpu',default=1,type=int)
+   parser.add_argument('-i','--input-base',help='input base path where to find job folders')
+   parser.add_argument('-n','--gpus-per-node',help='number of gpus (or ranks) per node',type=int)
+   parser.add_argument('-r','--ranks-per-gpu',help='number of ranks per gpu',type=int)
+   parser.add_argument('-m','--machine',help='name of the machine')
+   parser.add_argument('-t','--total-nodes',help='total number of nodes on machine',type=int)
 
    parser.add_argument('--debug', dest='debug', default=False, action='store_true', help="Set Logger to DEBUG")
    parser.add_argument('--error', dest='error', default=False, action='store_true', help="Set Logger to ERROR")
@@ -131,14 +133,14 @@ def main():
    # Plot the Events per second per rank 
    ax = df.plot(x='nodes',y='event_rate_mean',legend=False,style='o-')
    plt.fill_between(df['nodes'],df['event_rate_mean'] - df['event_rate_sigma'],df['event_rate_mean'] + df['event_rate_sigma'],alpha=0.5)
-   ax.set_xlabel('total Sunspot nodes (128 max)')
+   ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('ME/sec/rank')
    ax.set_yscale('log')
    plt.savefig('event_rate.png')
    
    # Plot total event calculated
    ax = df.plot(x='nodes',y='events_total',legend=False,style='o-')
-   ax.set_xlabel('total Polaris nodes (496 max)')
+   ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('total events')
    slope, intercept, r_value, p_value, std_err = stats.linregress(df['nodes'],df['events_total'])
    xlims = ax.get_xlim()
@@ -151,7 +153,7 @@ def main():
 
    # Plot total run time
    ax = df.plot(x='nodes',y='total_runtime_sec',legend=False,style='o-')
-   ax.set_xlabel('total Sunspot nodes (128 max)')
+   ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('total end-to-end runtime (sec)')
    plt.savefig('total_runtime.png')
 
@@ -170,27 +172,27 @@ def main():
    df['me_unknown'] = df['madevent_frac'] - df['fortran_overhead_frac'] - df['sycl_mes_sec_frac']
    
 
-   ax = df.plot(x='nodes',y='init_frac',        kind='bar',stacked=True,color='teal',         label='init')
-   df.plot(x='nodes',y='movefiles_frac',        kind='bar',stacked=True,color='orange', ax=ax,label='move')
-   df.plot(x='nodes',y='fortran_overhead_frac', kind='bar',stacked=True,color='red',    ax=ax,label='ME-Fortran')
-   df.plot(x='nodes',y='sycl_mes_sec_frac',     kind='bar',stacked=True,color='blue',   ax=ax,label='ME-Sycl')
-   df.plot(x='nodes',y='parse_frac',            kind='bar',stacked=True,color='green',  ax=ax,label='parse')
-   df.plot(x='nodes',y='writelhe_frac',         kind='bar',stacked=True,color='yellow', ax=ax,label='write-lhe')
-   df.plot(x='nodes',y='final_frac',            kind='bar',stacked=True,color='violet', ax=ax,label='final')
-   ax.set_ylim(0,1)
-   ax.legend()
-   plt.savefig('runtime_split.png')
+   # ax = df.plot(x='nodes',y='init_frac',        kind='bar',stacked=True,color='teal',         label='init')
+   # df.plot(x='nodes',y='movefiles_frac',        kind='bar',stacked=True,color='orange', ax=ax,label='move')
+   # df.plot(x='nodes',y='fortran_overhead_frac', kind='bar',stacked=True,color='red',    ax=ax,label='ME-Fortran')
+   # df.plot(x='nodes',y='sycl_mes_sec_frac',     kind='bar',stacked=True,color='blue',   ax=ax,label='ME-Sycl')
+   # df.plot(x='nodes',y='parse_frac',            kind='bar',stacked=True,color='green',  ax=ax,label='parse')
+   # df.plot(x='nodes',y='writelhe_frac',         kind='bar',stacked=True,color='yellow', ax=ax,label='write-lhe')
+   # df.plot(x='nodes',y='final_frac',            kind='bar',stacked=True,color='violet', ax=ax,label='final')
+   # ax.set_ylim(0,1)
+   # ax.legend()
+   # plt.savefig('runtime_split.png')
 
    xdf = df[['init_frac','movefiles_frac','parse_frac','writelhe_frac','final_frac','fortran_overhead_frac','sycl_mes_sec_frac','me_unknown','nodes']]
    colors={'init_frac':'darkred','movefiles_frac':'red','parse_frac':'green','writelhe_frac':'blue','final_frac':'violet','fortran_overhead_frac':'orange','sycl_mes_sec_frac':'yellow','me_unknown':'black'}
    labels = ['init','move','parse','writelhe','final','me_fortran','me_sycl','unkonwn']
    ax = xdf.plot.bar(x='nodes',stacked=True,color=colors)
    ax.set_ylim(0,1)
-   ax.set_xlabel('total Sunspot nodes (128 max)')
+   ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('fraction of total runtime')
    ax.grid(True,which='major',axis='y')
    lgd = ax.legend(bbox_to_anchor=(1.0, 1.05),labels=labels)
-   txt = ax.text(len(colors.keys())-0.4,0.4,'%d Ranks per GPU\n%d GPUs per node' % (args.ranks_per_gpu,args.gpus_per_node))
+   txt = plt.gcf().text(0.92,0.4,'%d Ranks per GPU\n%d GPUs per node' % (args.ranks_per_gpu,args.gpus_per_node))
    plt.savefig('runtime_split.png',bbox_extra_artists=[lgd,txt],bbox_inches='tight')
    
    print(df[['init_frac','movefiles_frac','parse_frac','writelhe_frac','final_frac','fortran_overhead_frac','sycl_mes_sec_frac']])
