@@ -118,6 +118,8 @@ def main():
 
    df['nodes'] = df['nranks'] / ranks_per_node
 
+   df.sort_values(by='nodes',inplace=True)
+
    df['program_total_sec_mean'] = df['sum_program_total_sec']/df['nranks']
    df['program_total_sec_sigma'] = np.sqrt(df['sum2_program_total_sec']/df['nranks'] - df['program_total_sec_mean']*df['program_total_sec_mean'])
 
