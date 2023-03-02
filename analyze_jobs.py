@@ -138,7 +138,7 @@ def main():
    ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('ME/sec/rank')
    ax.set_yscale('log')
-   plt.savefig('event_rate.png')
+   plt.gcf().savefig('event_rate.png',dpi=160,bbox_inches='tight')
    
    # Plot total event calculated
    ax = df.plot(x='nodes',y='events_total',legend=False,style='o-')
@@ -150,14 +150,14 @@ def main():
    y_vals = intercept + slope * x_vals
    ax.plot(x_vals,y_vals)
    ax.text(xlims[0]+(xlims[1] - xlims[0])*0.1,ax.get_ylim()[1]*0.8,f'{slope:5.3g} * x + {intercept:5.3g}')
-   plt.savefig('events_total.png')
+   plt.savefig('events_total.png',dpi=160,bbox_inches='tight')
    
 
    # Plot total run time
    ax = df.plot(x='nodes',y='total_runtime_sec',legend=False,style='o-')
    ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
    ax.set_ylabel('total end-to-end runtime (sec)')
-   plt.savefig('total_runtime.png')
+   plt.savefig('total_runtime.png',dpi=160,bbox_inches='tight')
 
 
    # Plot fraction of time spent in each section
@@ -187,7 +187,7 @@ def main():
 
    xdf = df[['init_frac','movefiles_frac','parse_frac','writelhe_frac','final_frac','fortran_overhead_frac','sycl_mes_sec_frac','me_unknown','nodes']]
    colors={'init_frac':'darkred','movefiles_frac':'red','parse_frac':'green','writelhe_frac':'blue','final_frac':'violet','fortran_overhead_frac':'orange','sycl_mes_sec_frac':'yellow','me_unknown':'black'}
-   labels = ['init','move','parse','writelhe','final','me_fortran','me_sycl','unkonwn']
+   labels = ['init','move','parse','writelhe','final','me_fortran','me_sycl','unknown']
    ax = xdf.plot.bar(x='nodes',stacked=True,color=colors)
    ax.set_ylim(0,1)
    ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
@@ -195,7 +195,7 @@ def main():
    ax.grid(True,which='major',axis='y')
    lgd = ax.legend(bbox_to_anchor=(1.0, 1.05),labels=labels)
    txt = plt.gcf().text(0.92,0.4,'%d Ranks per GPU\n%d GPUs per node' % (args.ranks_per_gpu,args.gpus_per_node))
-   plt.savefig('runtime_split.png',bbox_extra_artists=[lgd,txt],bbox_inches='tight')
+   plt.savefig('runtime_split.png',bbox_extra_artists=[lgd,txt],bbox_inches='tight',dpi=160)
    
    print(df[['init_frac','movefiles_frac','parse_frac','writelhe_frac','final_frac','fortran_overhead_frac','sycl_mes_sec_frac']])
    
