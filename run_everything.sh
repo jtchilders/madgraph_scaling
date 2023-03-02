@@ -3,7 +3,6 @@ if [ -z "${PROJ_PATH+xxx}" ]; then echo "PROJ_PATH is not set at all"; fi
 if [ -z "${JOBDIR+xxx}" ]; then echo "JOBDIR is not set at all"; fi
 
 
-export MEPYTHON=/lus/gila/projects/atlas_aesp_CNDA/conda/2023-02-22/bin/python
 export MG_PROC_DIR=$PROJ_PATH/madgraph4gpu-sycl_vector/epochX/sycl/gg_ttgg.mad
 RAND_SEED=12345
 export SCRIPTSDIR=$PROJ_PATH/scripts
