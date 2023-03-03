@@ -13,7 +13,9 @@ MAX_ITERS=10
 # MAX_ITERS=1
 
 #echo [$SECONDS][$RANK][$LOCAL_RANK] setup script
-source $SCRIPTSDIR/setup_sycl.sh > /dev/shm/setup.log 2>&1
+source $SCRIPTSDIR/$SYCL_SETUP > ./setup.log 2>&1
+echo $LD_LIBRARY_PATH
+ldd /eagle/atlas_aesp/madgraph/madgraph4gpu-sycl_vector/epochX/sycl/gg_ttgg.mad/SubProcesses/P1_gg_ttxgg/build.d_inl0_hrd0/madevent_sycl
 # added this otherwise all ranks use 1 GPU
 #export CUDA_VISIBLE_DEVICES=$(( $LOCAL_RANK ))
 cat > input.txt << EOF

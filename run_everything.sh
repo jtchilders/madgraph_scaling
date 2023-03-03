@@ -3,9 +3,8 @@ if [ -z "${PROJ_PATH+xxx}" ]; then echo "PROJ_PATH is not set at all"; fi
 if [ -z "${JOBDIR+xxx}" ]; then echo "JOBDIR is not set at all"; fi
 
 
-export MG_PROC_DIR=$PROJ_PATH/madgraph4gpu-sycl_vector/epochX/sycl/gg_ttgg.mad
 RAND_SEED=12345
-export SCRIPTSDIR=$PROJ_PATH/scripts
+export SCRIPTSDIR=$PROJ_PATH/madgraph_scaling
 RAMDISK=/dev/shm
 
 RANK_STR=$($MEPYTHON $SCRIPTSDIR/get_mpi_info.py -n $GPUS_PER_NODE -r $RANKS_PER_GPU)
