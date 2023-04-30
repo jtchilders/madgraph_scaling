@@ -8,7 +8,7 @@
 
 NODES=`cat $PBS_NODEFILE | wc -l`
 export GPUS_PER_NODE=6
-export TILES_PER_GPU=2
+export TILES_PER_GPU=1
 export RANKS_PER_TILE=1
 RANKS_PER_NODE=$(( GPUS_PER_NODE * TILES_PER_GPU * RANKS_PER_TILE ))
 RANKS=$((NODES * RANKS_PER_NODE ))
@@ -21,11 +21,12 @@ export PROJ_PATH=/lus/gila/projects/atlas_aesp_CNDA/madgraph_scaling
 export MEPYTHON=/lus/gila/projects/atlas_aesp_CNDA/conda/2023-02-22/bin/python
 export MG_PROC_DIR=$PROJ_PATH/madgraph4gpu-sycl_vector/epochX/sycl/gg_ttgg.mad
 export SYCL_SETUP=setup_sycl_sunspot.sh
+export MACHINE=sunspot
 
 export JOBDIR=$PROJ_PATH/jobs/$PBS_JOBID
 mkdir -p $JOBDIR
 cd $JOBDIR
 echo [$SECONDS] starting mpiexec from path: $PWD
-mpiexec -n $RANKS -ppn $RANKS_PER_NODE $PROJ_PATH/scripts/run_everything.sh 1> $JOBDIR/run_stdout.txt 2> $JOBDIR/run_stderr.txt
+mpiexec -n $RANKS -ppn $RANKS_PER_NODE $PROJ_PATH/madgraph_scaling/run_everything.sh 1> $JOBDIR/run_stdout.txt 2> $JOBDIR/run_stderr.txt
 
 echo [$SECONDS] Completed Everything
