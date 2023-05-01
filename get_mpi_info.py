@@ -28,9 +28,12 @@ if 'sunspot' in machine:
    # tile_num (0 or 1)
    tile_num = int((lrank - (gpu_num * tiles_per_gpu * ranks_per_tile) ) / ranks_per_tile)
 
-if tiles_per_gpu*ranks_per_tile == 1:
-   ze_affinity_mask = '%d' % gpu_num
-else:
-   ze_affinity_mask = '%d.%d' % (gpu_num,tile_num)
+   if tiles_per_gpu*ranks_per_tile == 1:
+      ze_affinity_mask = '%d' % gpu_num
+   else:
+      ze_affinity_mask = '%d.%d' % (gpu_num,tile_num)
+elif 'polaris' in machine:
+   gpu_num = int(lrank / (tiles_per_gpu * ranks_per_tile))
+   ze_affinity_mask= '%d' % gpu_num
 
 print(rank,nranks,'%02d' % lrank,lnranks,ze_affinity_mask)

@@ -9,15 +9,18 @@
 
 NODES=`cat $PBS_NODEFILE | wc -l`
 export GPUS_PER_NODE=4
-export RANKS_PER_GPU=1
-RANKS_PER_NODE=$(( GPUS_PER_NODE * RANKS_PER_GPU ))
-RANKS=$((NODES * GPUS_PER_NODE * RANKS_PER_GPU))
-echo [$SECONDS] NODES=$NODES GPUS_PER_NODE=$GPUS_PER_NODE RANKS_PER_GPU=$RANKS_PER_GPU  RANKS=$RANKS
+export TILES_PER_GPU=1
+export RANKS_PER_TILE=1
+RANKS_PER_NODE=$(( GPUS_PER_NODE * TILES_PER_GPU * RANKS_PER_TILE ))
+RANKS=$((NODES * RANKS_PER_NODE))
+echo [$SECONDS] NODES=$NODES GPUS_PER_NODE=$GPUS_PER_NODE TILES_PER_GPU=$TILES_PER_GPU RANKS_PER_TILE=$RANKS_PER_TILE  RANKS=$RANKS
+
 
 export PROJ_PATH=/eagle/atlas_aesp/madgraph
 export MEPYTHON=/eagle/atlas_aesp/madgraph/balsam_env/bin/python
 export MG_PROC_DIR=/eagle/atlas_aesp/madgraph/madgraph4gpu-sycl_vector/epochX/sycl/gg_ttgg.mad
 export SYCL_SETUP=setup_sycl_polaris.sh
+export MACHINE=polaris
 
 export JOBDIR=$PROJ_PATH/jobs/$PBS_JOBID
 mkdir -p $JOBDIR
