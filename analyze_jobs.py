@@ -74,7 +74,9 @@ def main():
    parser.add_argument('--logfilename',dest='logfilename',default=None,help='if set, logging information will go to file')
    args = parser.parse_args()
 
+   gpus_per_node = args.gpus_per_node
    ranks_per_node = args.gpus_per_node * args.ranks_per_gpu
+   
 
    if args.debug and not args.error and not args.warning:
       logging_level = logging.DEBUG
@@ -123,6 +125,7 @@ def main():
    df['program_total_sec_mean'] = df['sum_program_total_sec']/df['nranks']
    df['program_total_sec_sigma'] = np.sqrt(df['sum2_program_total_sec']/df['nranks'] - df['program_total_sec_mean']*df['program_total_sec_mean'])
 
+   # mean runtime measured by `$ time madevent ...`
    df['time_madevent_exe_sec_mean'] = df['sum_time_madevent_exe_sec']/df['nranks']
    df['time_madevent_exe_sec_sigma'] = np.sqrt(df['sum2_time_madevent_exe_sec']/df['nranks'] - df['time_madevent_exe_sec_mean']*df['time_madevent_exe_sec_mean'])
 
@@ -130,6 +133,9 @@ def main():
    df['event_rate_sigma'] = np.sqrt( df['sycl_mes_sec_sigma'] ** 2 * (df['sycl_total_events_per_rank'] / (df['sycl_mes_sec_mean'] ** 2) ) ** 2 )
 
    df['events_total'] = df['sycl_total_events_per_rank'] * df['nranks']
+
+   # Total Matrix Elements Calculated Per Total MadEvent wall-time Per Total Number of GPUs
+   df['me_per_madeventtime_per_gpu'] = df['events_total'] / df['time_madevent_exe_sec_mean'] / df['nodes'] / args.gpus_per_node
    
    
    # Plot the Events per second per rank 
@@ -196,6 +202,14 @@ def main():
    lgd = ax.legend(bbox_to_anchor=(1.0, 1.05),labels=labels)
    txt = plt.gcf().text(0.92,0.4,'%d Ranks per GPU\n%d GPUs per node' % (args.ranks_per_gpu,args.gpus_per_node))
    plt.savefig('runtime_split.png',bbox_extra_artists=[lgd,txt],bbox_inches='tight',dpi=160)
+
+
+   # Plot Total Matrix Elements Calculated Per Total MadEvent wall-time Per Total Number of GPUs
+   ax = df.plot(x='nodes',y='me_per_madeventtime_per_gpu',legend=False,style='o-')
+   ax.set_xlabel('total %s nodes (%d max)' % (args.machine,args.total_nodes))
+   ax.set_ylabel('ME / GPU / wall-time [1/s]')
+   plt.savefig('me_wall_rate.png',dpi=160,bbox_inches='tight')
+   df[['nodes','me_per_madeventtime_per_gpu']].to_csv('me_wall_rate.csv',index=False)
    
    print(df[['init_frac','movefiles_frac','parse_frac','writelhe_frac','final_frac','fortran_overhead_frac','sycl_mes_sec_frac']])
    
