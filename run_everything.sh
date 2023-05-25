@@ -18,12 +18,12 @@ LOCAL_NRANKS=${RANK_STR_ARRAY[3]}
 if [ $(hostname -f | grep polaris) ]; then
    export CUDA_VISIBLE_DEVICES=${RANK_STR_ARRAY[4]}
    echo [$SECONDS][$RANK] CUDA_VISIBLE_DEVICES=$CUDA_VISIBLE_DEVICES
-elif [$(hostname -f | grep sunspot) ]; then
+elif [ $(hostname -f | grep americas) ]; then
    export ZE_AFFINITY_MASK=${RANK_STR_ARRAY[4]}
    #export ZEX_NUMBER_OF_CCS=0:4
-   #echo [$SECONDS][$RANK] ZE_AFFINITY_MASK=$ZE_AFFINITY_MASK ZEX_NUMBER_OF_CCS=$ZEX_NUMBER_OF_CCS
+   echo [$SECONDS][$RANK] ZE_AFFINITY_MASK=$ZE_AFFINITY_MASK ZEX_NUMBER_OF_CCS=$ZEX_NUMBER_OF_CCS
 else
-   echo $(hostname) not specified
+   echo $(hostname -f) not specified $(hostname -f | grep americas)
 fi
 
 IS_RANK0=`expr $RANK == 0`
