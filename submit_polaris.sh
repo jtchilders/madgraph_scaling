@@ -10,8 +10,7 @@
 NODES=`cat $PBS_NODEFILE | wc -l`
 export GPUS_PER_NODE=4
 export TILES_PER_GPU=1
-export RANKS_PER_TILE=1
-export RANKS_PER_GPU=$(( TILES_PER_GPU * RANKS_PER_TIME ))
+export RANKS_PER_TILE=2
 RANKS_PER_NODE=$(( GPUS_PER_NODE * TILES_PER_GPU * RANKS_PER_TILE ))
 RANKS=$((NODES * RANKS_PER_NODE))
 echo [$SECONDS] NODES=$NODES GPUS_PER_NODE=$GPUS_PER_NODE TILES_PER_GPU=$TILES_PER_GPU RANKS_PER_TILE=$RANKS_PER_TILE  RANKS=$RANKS
@@ -27,17 +26,11 @@ export JOBDIR=$PROJ_PATH/jobs/$PBS_JOBID
 mkdir -p $JOBDIR
 cd $JOBDIR
 
-if [ "$RANKS_PER_GPU" -gt "1" ]; then
-   echo [$SECONDS] starting MPS on every rank
-   mpiexec -n $NODES -ppn 1 $PROJ_PATH/madgraph_scaling/polaris_start_cuda_mps.sh
-fi
-
 echo [$SECONDS] starting mpiexec from path: $PWD
-mpiexec -n $RANKS -ppn $RANKS_PER_NODE $PROJ_PATH/madgraph_scaling/run_everything.sh 1> $JOBDIR/run_stdout.txt 2> $JOBDIR/run_stderr.txt
-
-if [ "$RANKS_PER_GPU" -gt "1" ]; then
-   echo [$SECONDS] stoping MPS on every rank
-   mpiexec -n $NODES -ppn 1 $PROJ_PATH/madgraph_scaling/polaris_stop_cuda_mps.sh
-fi
+mpiexec -n $RANKS -ppn $RANKS_PER_NODE \
+   $PROJ_PATH/madgraph_scaling/run_everything.sh \
+      $GPUS_PER_NODE $TILES_PER_GPU $RANKS_PER_TILE \
+      $PROJ_PATH $MEPYTHON $MG_PROC_DIR $SYCL_SETUP $MACHINE \
+      1> $JOBDIR/run_stdout.txt 2> $JOBDIR/run_stderr.txt
 
 echo [$SECONDS] Completed Everything

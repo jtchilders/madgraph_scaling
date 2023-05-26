@@ -12,7 +12,7 @@ MAX_ITERS=10
 # MIN_ITERS=1
 # MAX_ITERS=1
 
-echo [$SECONDS][$RANK][$LOCAL_RANK] setup script
+# echo [$SECONDS][$RANK][$LOCAL_RANK] setup script
 source $SCRIPTSDIR/$SYCL_SETUP > ./setup.log 2>&1
 # added this otherwise all ranks use 1 GPU
 #export CUDA_VISIBLE_DEVICES=$(( $LOCAL_RANK ))
