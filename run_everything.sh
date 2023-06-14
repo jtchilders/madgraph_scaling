@@ -1,6 +1,4 @@
 #!/bin/bash
-if [ -z "${PROJ_PATH+xxx}" ]; then echo "PROJ_PATH is not set at all"; fi
-if [ -z "${JOBDIR+xxx}" ]; then echo "JOBDIR is not set at all"; fi
 
 export GPUS_PER_NODE=$1
 export TILES_PER_GPU=$2
@@ -43,6 +41,7 @@ HOSTNAME=`hostname`
 
 
 if [[ "$IS_RANK0" == 1 ]]; then
+   echo [$SECONDS][$RANK] PWD=$PWD
    echo [$SECONDS][$RANK] GPUS_PER_NODE=$GPUS_PER_NODE
    echo [$SECONDS][$RANK] TILES_PER_GPU=$TILES_PER_GPU
    echo [$SECONDS][$RANK] RANKS_PER_TILE=$RANKS_PER_TILE
@@ -54,8 +53,9 @@ if [[ "$IS_RANK0" == 1 ]]; then
    echo [$SECONDS][$RANK] MACHINE=$MACHINE
    echo [$SECONDS][$RANK] RAND_SEED=$RAND_SEED
    echo [$SECONDS][$RANK] SCRIPTSDIR=$SCRIPTSDIR
+   echo [$SECONDS][$RANK] JOBDIR=$JOBDIR
 fi
-
+export JOBDIR=$PWD
 #echo [$SECONDS][$RANK] RANK=$RANK  NRANKS=$NRANKS  LOCAL_RANK=$LOCAL_RANK   LOCAL_NRANKS=$LOCAL_NRANKS   HOSTNAME=$HOSTNAME  RANK_RAND_SEED = $RANK_RAND_SEED
 
 if [[ "$IS_RANK0" == 1 ]]; then
@@ -100,10 +100,6 @@ if [[ "$RANKS_PER_GPU" > 1 ]]  && [[ "$MACHINE" == "polaris" ]] && [[ "$IS_LOCAL
 fi
 
 
-if [ ! -d $JOBDIR ]; then
-   mkdir -p $JOBDIR
-fi
-
 $MEPYTHON  -c "import mpi4py.MPI as mpi;comm=mpi.COMM_WORLD;comm.barrier()"
 # parse stdout and dump json data
 if [[ "$IS_RANK0" == 1 ]]; then
@@ -125,8 +121,8 @@ if [[ "$IS_RANK0" == 1 ]]; then
    echo [$SECONDS][$RANK] done
 fi
 # only keep this during debugging
-if [[ "$IS_RANK0" == 1 ]]; then
-   mkdir $JOBDIR/ramdisk_rank0/
-   cp -r $RAMDISK/?? $JOBDIR/ramdisk_rank0/
-fi
+# if [[ "$IS_RANK0" == 1 ]]; then
+#    mkdir $JOBDIR/ramdisk_rank0/
+#    cp -r $RAMDISK/?? $JOBDIR/ramdisk_rank0/
+# fi
 
